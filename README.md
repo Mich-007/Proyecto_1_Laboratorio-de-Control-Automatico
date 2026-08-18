@@ -13,8 +13,8 @@ Este repositorio es para la entrega y presentación del primer proyecto del labo
 ## Codigos
 Ambos códigos están comentados con el fin de explicar y demostrar lo aplicado.
 
-* **motor_dc_simulador_app**
+* **motor_dc_simulador_lab**
 * El usuario ingresa los datos en la ventana de comandos y luego presenta la gráfica, además de que menciona si hay algún error dentro de la ventana de comandos por igual.
 
-* **motor_dc_simulador_lab**
+* **motor_dc_simulador_app**
 * El usuario ingresa los datos en la ventana externa (el código es más extenso y no era necesario, pero me pareció muy chiva todo lo que se podía realizar) y luego presenta la gráfica al lado de las celdas de los parámetros que se ingresaron sin necesidad de salirse, además de que menciona si hay algún error dentro de la otra ventana externa por igual.
