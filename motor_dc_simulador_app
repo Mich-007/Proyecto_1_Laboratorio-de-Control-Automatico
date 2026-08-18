@@ -1,0 +1,161 @@
+function motor_dc_simulador_app
+    % ----------------------------------------------------------------------------------------------------------------------
+    %La ventana
+    % 'uifigure' abre una
+    % ventana gráfica en MATLAB, se le especifica desde el nombre, tamaño y
+    % posición
+    ventana_principal = uifigure('Name', 'Simulador de Motor de CD', 'Position', [100, 100, 950, 600]);
+
+    % --------------------------------------------------------------------------------------------------------------------------
+    % Titulo
+    % Otra vez con 'uilabel' y con 'HorizontalAlignment', 'center' se puso
+    % en el centro
+    uilabel(ventana_principal, 'Text', 'Simulación Paramétrica de Motor de CD (Primer Orden)', 'Position', [175, 540, 600, 30], 'FontSize', 16, 'FontName', 'Times New Roman', 'FontWeight', 'bold', 'HorizontalAlignment', 'center');
+    
+    uilabel(ventana_principal, 'Text', 'Modelo: G(s) = Ganancia_Motor / (constante_tiempo*s + 1)', 'Position', [250, 515, 450, 22], 'FontSize', 12, 'FontName', 'Times New Roman', 'FontColor', [0.3 0.3 0.3], 'HorizontalAlignment', 'center');
+
+    % --------------------------------------------------------------------------------------------------------------------------
+    % Grafica con la curva de respuesta
+    % 'uiaxes' lo hace dentro de la ventana
+    ejes_grafica = uiaxes(ventana_principal, 'Position', [20, 80, 590, 420]);
+    title(ejes_grafica, 'Respuesta al Escalón Unitario', 'FontName', 'Times New Roman');
+    xlabel(ejes_grafica, 'Tiempo (s)', 'FontName', 'Times New Roman');
+    ylabel(ejes_grafica, 'Velocidad y(t)', 'FontName', 'Times New Roman');
+    %cuadricula
+    grid(ejes_grafica, 'on');
+
+    % -------------------------------------------------------------------------------------------------------------------
+    % Parametros
+    % Pequeño título arriba de los campos
+    uilabel(ventana_principal, 'Text', 'Datos a ingresar', ...
+        'Position', [640, 475, 280, 25], 'FontSize', 12, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
+
+    % eldas de texto con los nombres de cada propiedad física del motor
+    etiquetas_parametros = {'Constante de par [N.m/A]:', 'Resistencia armadura [Ohms]:', 'Fricción del eje [N.m.s/rad]:', 'Constante fem [V.s/rad]:', 'Momento de inercia [kg.m^2]:'};
+          
+    % valores iniciales que aparecerán escritos en cada cajita
+    valores_por_defecto = {'0.1', '1.0', '0.1', '0.1', '0.01'};
+    
+    %arreglo vacío de objetos gráficos para guardar los 5 campos de texto numérico
+    campos_entrada = gobjects(5, 1);
+    
+    % Un ciclo 'for' se repite 5 veces para dibujar cada etiqueta y su cajita de texto hacia abajo
+    for indice = 1:5
+        % Calcula la posición vertical 'y' restando espacio en cada vuelta del ciclo
+        posicion_y = 410 - (indice-1)*75;
+        
+        % Dibuja la etiqueta con el nombre del parámetro
+        uilabel(ventana_principal, 'Text', etiquetas_parametros{indice}, 'Position', [655, posicion_y + 25, 250, 20], 'FontSize', 10, 'FontName', 'Times New Roman');
+        
+        % Dibuja la cajita donde el usuario puede escribir números 
+        % 'str2double' para transformar el texto en un número real que Matlab pueda calcular
+        campos_entrada(indice) = uieditfield(ventana_principal, 'numeric', 'Position', [655, posicion_y, 240, 22], 'Value', str2double(valores_por_defecto{indice}), 'FontName', 'Times New Roman');
+    end
+
+    % --------------------------------------------------------------------------------------------------------------------------
+    % Boton
+    % 'uibutton' crea un botón 
+    % 'ButtonPushedFcn' es una función  le dice a MATLAB que 
+    % cuando el usuario haga clic en este botón, debe ejecutar la función 'ejecutarSimulacion'
+    boton_simular = uibutton(ventana_principal, 'push', 'Text', 'Simular y Validar', 'Position', [655, 20, 240, 40], 'FontName', 'Times New Roman', 'ButtonPushedFcn', @(btn,event) ejecutarSimulacion(campos_entrada, ejes_grafica, ventana_principal));
+end
+
+% ---------------------------------------------------------------------------------------------------------------------------------
+% Logica
+function ejecutarSimulacion(campos_entrada, ejes_grafica, ventana_principal)
+
+    % valores numéricos que el usuario escribió en las cajitas 
+    constante_par           = campos_entrada(1).Value;
+    resistencia_armadura    = campos_entrada(2).Value;
+    friccion_eje            = campos_entrada(3).Value;
+    constante_fem           = campos_entrada(4).Value;
+    momento_inercia         = campos_entrada(5).Value;
+
+    % --------------------------------------------------------------------------------------------------------------------------
+    % Validación
+    % Si la resistencia o la inercia son menores o iguales a cero, frenan el motor, causan errores matemáticos
+
+    if resistencia_armadura <= 0 || momento_inercia <= 0
+        uialert(ventana_principal, 'Error: No es posible hacerlo con esos datos, ingresa datos nuevos :c', 'Parámetros Inválidos', 'Icon', 'error');
+        return; % Detiene la ejecución
+    end
+
+    % Las constantes del motor no pueden ser negativas en este modelo básico
+    if constante_par < 0 || constante_fem < 0 || friccion_eje < 0
+        uialert(ventana_principal, 'Error: No es posible hacerlo con esos datos, ingresa datos nuevos :c', 'Parámetros Inválidos', 'Icon', 'error');
+        return;
+    end
+
+    
+
+    % --------------------------------------------------------------------------------------------------------------------------
+    % Calculos matematicos
+    % esto calcula el denominador común que une la parte eléctrica con la mecánica
+    denominador_comun = (resistencia_armadura * friccion_eje) + (constante_par * constante_fem);
+    
+    % Si el denominador da cero, presenta un error
+    if denominador_comun == 0
+        uialert(ventana_principal, 'Error: No es posible hacerlo con esos datos, ingresa datos nuevos. El denominador común es cero. :c', 'Error de Cálculo', 'Icon', 'error');
+        return;
+    end
+
+    % Ganancia del motor
+    ganancia_motor   = constante_par / denominador_comun;
+    
+    % Constante de tiempo 
+    constante_tiempo = (resistencia_armadura * momento_inercia) / denominador_comun;
+
+    % --------------------------------------------------------------------------------------------------------------------------
+    % Simulación matematica
+    % Por teoría, 5 veces la constante de tiempo (5*tau) es el tiempo óptimo 
+    % para ver cuando el motor ya se estabilizó por completo
+    tiempo_final = 5 * constante_tiempo;
+    if tiempo_final == 0
+        tiempo_final = 1; 
+    end
+    
+    % lista de instantes de tiempo desde 0 hasta el final, dividida en 500 partes 
+    % para que la curva salga suave
+    vector_tiempo = 0 : (tiempo_final / 500) : tiempo_final;
+    
+    % la fórmula matemática analítica del sistema de primer orden: y(t) = Ganancia * (1 - e^(-t / tau))
+    respuesta_velocidad = ganancia_motor * (1 - exp(-vector_tiempo / constante_tiempo));
+
+    % clcula los puntos clave importantes para la gráfica:
+    valor_final_esperado = ganancia_motor;    % Línea de estado estable
+    valor_en_constante_tiempo = 0.632 * ganancia_motor;     % El 63.2% de la velocidad 
+    tiempo_de_asentamiento = 4 * constante_tiempo;    % El tiempose estabiliza al 98%
+
+    % --------------------------------------------------------------------------------------------------------------------------
+    % Se dibuja la grafica
+    % 'cla' limpia la gráfica anterior para que no se encime con la nueva simulación
+    cla(ejes_grafica);
+    
+    % 'hold on' logra dibujar varios elementos encima del mismo plano cartesiano.
+    hold(ejes_grafica, 'on');
+
+    % la curva principal de velocidad con una línea continua de color negro ('k-')
+    plot(ejes_grafica, vector_tiempo, respuesta_velocidad, 'k-', 'LineWidth', 2, 'DisplayName', 'Respuesta y(t)');
+
+    % línea horizontal punteada roja que marca el valor final esperado
+    line(ejes_grafica, [0 tiempo_final], [valor_final_esperado valor_final_esperado], 'Color', 'r', 'LineStyle', '--', 'LineWidth', 1.2, 'DisplayName', 'Valor final (5\tau)');
+
+    %  punto rojo ('ro') exacto en el momento donde transcurre una constante de tiempo
+    plot(ejes_grafica, constante_tiempo, valor_en_constante_tiempo, 'ro', 'MarkerSize', 7, 'MarkerFaceColor', 'r', 'DisplayName', 't = \tau (63.2%)');
+
+    % Busca en qué posición del vector ocurre el tiempo de asentamiento y ponemos un triángulo azul
+    [~, indice_asentamiento] = min(abs(vector_tiempo - tiempo_de_asentamiento));
+    plot(ejes_grafica, tiempo_de_asentamiento, respuesta_velocidad(indice_asentamiento), 'blue^', 'MarkerSize', 7, 'MarkerFaceColor', 'b', 'DisplayName', 'Tiempo Asentamiento (2%)');
+
+    % Se apaga el 'hold on' porque ya termina la gráfica.
+    hold(ejes_grafica, 'off');
+    grid(ejes_grafica, 'on');
+    
+    % Actualiza el título del plano con los valores matemáticos calculados 
+    title(ejes_grafica, sprintf('G(s) = %.3f / (%.3fs + 1)', ganancia_motor, constante_tiempo));
+    xlabel(ejes_grafica, 'Tiempo (s)');
+    ylabel(ejes_grafica, 'Velocidad');
+    
+    % Muestra la caja de referencias en la esquina inferior derecha.
+    legend(ejes_grafica, 'Location', 'southeast', 'FontSize', 8);
+end
