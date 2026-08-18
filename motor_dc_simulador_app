@@ -57,7 +57,7 @@ function motor_dc_simulador_app
     % 'uibutton' crea un botón 
     % 'ButtonPushedFcn' es una función  le dice a MATLAB que 
     % cuando el usuario haga clic en este botón, debe ejecutar la función 'ejecutarSimulacion'
-    boton_simular = uibutton(ventana_principal, 'push', 'Text', 'Simular y Validar', 'Position', [655, 20, 240, 40], 'FontName', 'Times New Roman', 'ButtonPushedFcn', @(btn,event) ejecutarSimulacion(campos_entrada, ejes_grafica, ventana_principal));
+    boton_simular = uibutton(ventana_principal, 'push', 'Text', 'Simular Grafica', 'Position', [655, 20, 240, 40], 'FontName', 'Times New Roman', 'ButtonPushedFcn', @(btn,event) ejecutarSimulacion(campos_entrada, ejes_grafica, ventana_principal));
 end
 
 % ---------------------------------------------------------------------------------------------------------------------------------
