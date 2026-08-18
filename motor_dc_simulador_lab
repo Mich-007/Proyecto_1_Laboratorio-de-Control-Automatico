@@ -1,0 +1,93 @@
+function motor_dc_simulador_lab
+% Codigo de simulación para el proyecto 1 
+%Sale en pantalla
+disp("_______________________________________________________");
+disp("                                                       ");
+disp("                 SIMULADOR DE MOTOR DE CD              ");
+disp("_______________________________________________________");
+
+disp("Ingresa los siguientes datos para la generación del grafico");
+disp("                                                       ");
+
+% Le pido al usuario que escriba un número en la consola, por cada parametro
+constante_par = input('Ingrese la Constante de par [N.m/A]: ');
+
+resistencia_armadura = input('Ingrese la Resistencia de armadura [Ohms]: ');
+
+friccion_eje = input('Ingrese la Fricción del eje [N.m.s/rad]: ');
+
+constante_fem = input('Ingrese la Constante fem [V.s/rad]: ');
+
+momento_inercia = input('Ingrese el Momento de inercia [kg.m^2]: ');
+
+
+% ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+% Revisar que los datos este dentro de lo permitido
+
+if resistencia_armadura <= 0 || momento_inercia <= 0
+    error('Error :c : No es posible hacerlo con esos datos, ingresa datos nuevos, porfavor. Nota: Se debe a que la resistencia y la inercia deben ser mayores a cero. :(');
+    
+end
+
+if constante_par < 0 || constante_fem < 0 || friccion_eje < 0
+    error('Error :c : No es posible hacerlo con esos datos, ingresa datos nuevos, por favor. Nota: Se debe a que los parámetros no pueden ser negativos.');
+end
+
+% ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+% Fórmulas de Control 
+denominador_comun = (resistencia_armadura * friccion_eje) + (constante_par * constante_fem);
+
+if denominador_comun == 0
+    error('Error :c : No es posible hacerlo con esos datos, ingresa datos nuevos. El denominador común es cero.');
+end
+
+ganancia_motor = constante_par / denominador_comun;
+constante_tiempo = (resistencia_armadura * momento_inercia) / denominador_comun;
+
+% ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+%Vector de tiempo
+
+tiempo_final = 5 * constante_tiempo;
+if tiempo_final == 0
+    tiempo_final = 1; 
+end
+
+vector_tiempo = 0 : (tiempo_final / 500) : tiempo_final;
+
+% Ecuación de la respuesta al escalón de primer orden
+respuesta_velocidad = ganancia_motor * (1 - exp(-vector_tiempo / constante_tiempo));
+
+% ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+%Los puntos en la grafica
+
+valor_final_esperado = ganancia_motor;                     
+valor_en_constante_tiempo = 0.632 * ganancia_motor;        
+tiempo_de_asentamiento = 4 * constante_tiempo;             
+
+% ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+% Grafica
+
+figure('Name', 'Simulador de Motor de CD', 'NumberTitle', 'off');
+
+hold on;
+
+plot(vector_tiempo, respuesta_velocidad, 'k-', 'LineWidth', 2, 'DisplayName', 'Respuesta y(t)');
+
+line([0 tiempo_final], [valor_final_esperado valor_final_esperado], 'Color', 'r', 'LineStyle', '--', 'LineWidth', 1.2, 'DisplayName', 'Valor final (5\tau)');
+
+plot(constante_tiempo, valor_en_constante_tiempo, 'ro', 'MarkerSize', 7, 'MarkerFaceColor', 'r', 'DisplayName', 't = \tau (63.2%)');
+
+[~, indice_asentamiento] = min(abs(vector_tiempo - tiempo_de_asentamiento));
+plot(tiempo_de_asentamiento, respuesta_velocidad(indice_asentamiento), 'blue^', 'MarkerSize', 7, 'MarkerFaceColor', 'b', 'DisplayName', 'Tiempo Asentamiento (2%)');
+
+hold off;
+
+grid on;
+title(sprintf('G(s) = %.3f / (%.3fs + 1)', ganancia_motor, constante_tiempo), 'FontName', 'Times New Roman');
+xlabel('Tiempo  (s)', 'FontName', 'Times New Roman');
+ylabel('Velocidad  ', 'FontName', 'Times New Roman');
+
+legend('Location', 'southeast', 'FontSize', 10);
+
+disp("Fin de la simulación c:");
+end
