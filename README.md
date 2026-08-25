@@ -21,3 +21,11 @@ Ambos códigos están comentados con el fin de explicar y demostrar lo aplicado.
 
 * **proyecto2_routh_rootlocus**
 * Este es el código a correr para el proyecto 2 y además es la continuación de primero, entonces la parte del proyecto 2, se presenta después de que se pregunte si usted quiere ingresar los ceros/polos manualmente o continuar con la planta.
+
+- Ejemplo de cómo se debe de ingresar específicamente los polos y ceros: (puede cambiar los valores de los numeros, pero con los corchetes)
+
+Cero: [0 -2]
+Polos: [-1 -3 -5]
+
+
+
