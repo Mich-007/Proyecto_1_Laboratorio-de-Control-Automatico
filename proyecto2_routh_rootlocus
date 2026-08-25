@@ -41,7 +41,7 @@ disp("Resultados del modelo del motor:");
 fprintf("  Ganancia del motor K_M = %.6g\n", ganancia_motor);
 fprintf("  Constante de tiempo tau = %.6g s\n", constante_tiempo);
 
-% -------------------- RESPUESTA AL ESCALÓN (igual que tu original) ----------------------------------------------------------------
+% -------------------- RESPUESTA AL ESCALÓN ----------------------------------------------------------------
 tiempo_final = 5 * constante_tiempo;
 if tiempo_final == 0
     tiempo_final = 1; 
@@ -72,16 +72,17 @@ legend('Location', 'southeast', 'FontSize', 10);
 disp("Fin de la simulación del Proyecto 1.");
 disp("-------------------------------------------------------");
 
-% --------------------------------------- INICIO PROYECTO 2 (explicado) ------------------------------------------------------------
+% --------------------------------------- INICIO PROYECTO 2 (explicado y comentado) ------------------------------------------------------------
 disp(" ");
-disp("=======================================================");
+disp("=====================================================================================================================================");
 disp("Ahora continuamos con el Proyecto 2: Routh-Hurwitz y Root Locus");
-disp("=======================================================");
+disp("=====================================================================================================================================");
 disp("Según la especificación, el script debe solicitar ceros y polos de G(s).");
 disp("Puedes elegir usar la planta del motor calculada arriba o ingresar ceros/polos manualmente.");
 disp(" ");
 
 % Opción para usar la planta del motor o ingresar ceros/polos
+
 disp("Elija la opción para definir la planta G(s):");
 disp("  1 - Usar la planta del motor (G(s) = K_M / (tau s + 1))");
 disp("  2 - Ingresar ceros y polos manualmente (ejemplo: [0 -2] y [-1 -3 -5])");
@@ -95,15 +96,19 @@ switch opcion
         funcion_transferencia_lazo_abierto = tf(numerador_planta, denominador_planta);
         disp("Has elegido usar la planta del motor calculada.");
     case 2
-        % Pedir ceros y polos al usuario (cumple la especificación del proyecto 2)
+        % Pedir ceros y polos al usuario (cumple la especificación del proyecto 2, lo presento así para que se puedan ver la unión de ambos)
         disp("Ingrese los ceros y polos como vectores en MATLAB (usar corchetes).");
-        ceros_usuario = input('Ingrese los ceros de G(s) como vector (ejemplo: [0 -2]): ');
-        polos_usuario = input('Ingrese los polos de G(s) como vector (ejemplo: [-1 -3 -5]): ');
+        disp("ejemplo de ceros: [0 -2]");
+        disp("ejemplo de polos: [-1 -3 -5]");
+
+
+        ceros_usuario = input('Ingrese los ceros de G(s) como vector: ');
+        polos_usuario = input('Ingrese los polos de G(s) como vector: ');
         if isempty(polos_usuario)
             error('Debe ingresar al menos un polo para definir la planta.');
         end
         numerador_planta = poly(ceros_usuario);   % convierte ceros a polinomio
-        denominador_planta = poly(polos_usuario); % convierte polos a polinomio
+        denominador_planta = poly(polos_usuario);            % convierte polos a polinomio
         funcion_transferencia_lazo_abierto = tf(numerador_planta, denominador_planta);
         disp("Has elegido ingresar ceros y polos manualmente.");
     otherwise
@@ -117,7 +122,7 @@ disp("FUNCIÓN DE TRANSFERENCIA EN LAZO ABIERTO G(s):");
 fprintf("  Numerador (coeficientes): "); disp(numG);
 fprintf("  Denominador (coeficientes): "); disp(denG);
 
-% -------------------- CONSTRUCCIÓN ECUACIÓN CARACTERÍSTICA ---------------
+% -------------------- CONSTRUCCIÓN ECUACIÓN CARACTERÍSTICA ------------------------------------------------------------------------------
 % Explicación breve: para lazo cerrado con realimentación unitaria la ecuación característica es:
 % 1 + K*G(s) = 0  -> multiplicando por denG(s): denG(s) + K*numG(s) = 0
 % Para análisis numérico tomamos K = 1 (se puede extender si se desea)
@@ -136,7 +141,7 @@ else
     coeficientes_ecuacion_caracteristica = denG + K_analisis * numG;
 end
 
-disp("-------------------------------------------------------");
+disp("-------------------------------------------------------------------------------------------------------------");
 disp("ECUACIÓN CARACTERÍSTICA (con K = 1):");
 fprintf("  Coeficientes (orden descendente): "); disp(coeficientes_ecuacion_caracteristica);
 
@@ -203,9 +208,9 @@ end
 
 % -------------------- FUNCION AUXILIAR: routh_table -----------------------
 function tabla = routh_table(coeficientes)
-    % Construye la tabla de Routh-Hurwitz para un vector de coeficientes
+ % Construye la tabla de Routh-Hurwitz para un vector de coeficientes
     % coeficientes: vector con coeficientes del polinomio característico (orden descendente)
-    % Esta implementación maneja el caso a==0 usando un pequeño epsilon para
+% Esta implementación maneja el caso a==0 usando un pequeño epsilon para
     % evitar división por cero y detecta filas de ceros (devuelve ceros en la fila).
     
     n = length(coeficientes);
