@@ -44,8 +44,6 @@ title('Donde estan los Polos (X) y ceros (O) de la planta original, además aqu�
 % El usuario hace click en la gráfica del plano complejo de antes, por eso el mensaje lo dice de una vez
 % ginput(1) captura las coordenadas (x,y) del punto seleccionado
 
-
-% Para que se puedan varios polos
 cantidad_polos_nuevos = input('Cuántos polos nuevos quiere agregar con clicks?')
 
 disp('Haga los clicks en la gráfica para seleccionar un o los nuevos polos');
@@ -58,9 +56,18 @@ nuevos_polos_compensador = x_clicks + 1i*y_clicks;
 disp('Los nuevos polos seleccionados con el click:');
 disp(nuevos_polos_compensador);
 
+%% Decisión: reubicar o agregar, en caso de que se necesiten las dos
+modo = input('Desea reubicar poner (1) o agregar poner (2)?: ');
+
+if modo == 1
+    % Reemplazar polos originales
+    vector_polos_compensador = nuevos_polos_compensador.'; 
+else
 %% Crea la función compensada
-% Se agrega el o los polos al vector de polos originales
+% Se agrega este polo al vector de polos originales
 vector_polos_compensador = [vector_polos_planta, nuevos_polos_compensador.'];
+
+end
 
 % Hay que calcular el nuevo denominador con los polos compensados
 coeficientes_denominador_compensador = poly(vector_polos_compensador);
