@@ -1,1 +1,79 @@
 
+% Proyecto corto #3
+% Autora: Michelle
+
+disp('_____________________________________________________________________________')
+disp('                                                                             ')
+disp('                             Proyecto 3                                      ')
+disp('_____________________________________________________________________________')
+disp('Proximamente se le va a ingresar los ceros y polos, porfavor')
+disp('                                            ')
+
+%% Pantla planta original
+% Se pide que se ingresen los ceros y polos de la función de transferencia G(s).
+% Ejemplo de como ingresarlos: ceros = [0 -3], polos = [-1 -4 -6]
+vector_ceros_planta = input('Ahora ingrese los ceros de G(s) como vector: ');
+vector_polos_planta = input('Ahora ingrese los polos de G(s) como vector: ');
+
+% los ceros y polos se convierten en polinomios usando poly()
+coeficientes_numerador = poly(vector_ceros_planta); % polinomio del numerador
+coeficientes_denominador = poly(vector_polos_planta); % polinomio del denominador
+
+% función de transferencia de la planta
+funcion_transferencia_planta = tf(coeficientes_numerador, coeficientes_denominador);
+
+% función de transferencia en consola
+disp('Función de transferencia G(s) de la planta original:');
+disp(funcion_transferencia_planta);
+
+%% Dibujar polos y ceros en el plano complejo
+% Aquí graficamos los polos (X) y ceros (O) en el plano
+% Asi se puede ver la como estan ubicados inicialmente en la planta.
+figure('Name','Plano complejo de polos y ceros','NumberTitle','off');
+plot(real(vector_polos_planta), imag(vector_polos_planta), 'x', 'MarkerSize', 10, 'LineWidth', 2);
+hold on;
+
+plot(real(vector_ceros_planta), imag(vector_ceros_planta), 'o', 'MarkerSize', 10, 'LineWidth', 2);
+grid on;
+
+xlabel('Parte real');
+ylabel('Parte imaginaria');
+title('Donde estan los Polos (X) y ceros (O) de la planta original, además aquí es donde puede realizar el click para marcar el nuevo polo');
+
+%% Selecciona un nuevo polo con click
+% El usuario hace click en la gráfica del plano complejo de antes, por eso el mensaje lo dice de una vez
+% ginput(1) captura las coordenadas (x,y) del punto seleccionado
+
+disp('Haga click en la gráfica para seleccionar un nuevo polo...');
+[x_click, y_click] = ginput(1); % captura coordenadas del click
+
+% Polne las coordenadas en un número complejo (nuevo polo)
+nuevo_polo_compensador = x_click + 1i*y_click;
+
+% Se muestra el polo seleccionado con el click
+disp('El nuevo polo seleccionado con el click:');
+disp(nuevo_polo_compensador);
+
+%% Crea la función compensada
+% Se agrega este polo al vector de polos originales
+vector_polos_compensador = [vector_polos_planta nuevo_polo_compensador];
+
+% Hay que calcular el nuevo denominador con los polos compensados
+coeficientes_denominador_compensador = poly(vector_polos_compensador);
+
+% la nueva función de transferencia compensada
+funcion_transferencia_compensada = tf(coeficientes_numerador, coeficientes_denominador_compensador);
+
+% la nueva función de transferencia en consola
+disp('La nueva función de transferencia Gc(s) resultante:');
+disp(funcion_transferencia_compensada);
+
+%% Graficar respuesta al escalón del sistema compensado
+% Finalmente, graficamos cómo responde el sistema compensado
+% ante una entrada escalón unitario.
+figure('Name','Respuesta al escalón del sistema compensado','NumberTitle','off');
+step(funcion_transferencia_compensada);
+grid on;
+
+title('Respuesta al escalón del sistema compensado final');
+
