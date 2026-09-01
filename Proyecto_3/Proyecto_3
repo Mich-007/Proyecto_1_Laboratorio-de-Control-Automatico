@@ -6,14 +6,14 @@ disp('__________________________________________________________________________
 disp('                                                                             ')
 disp('                             Proyecto 3                                      ')
 disp('_____________________________________________________________________________')
-disp('Proximamente se le va a ingresar los ceros y polos, porfavor')
+disp('Proximamente va a ingresar los ceros y polos, porfavor')
 disp('                                            ')
 
 %% Pantla planta original
 % Se pide que se ingresen los ceros y polos de la función de transferencia G(s).
 % Ejemplo de como ingresarlos: ceros = [0 -3], polos = [-1 -4 -6]
-vector_ceros_planta = input('Ahora ingrese los ceros de G(s) como vector: ');
-vector_polos_planta = input('Ahora ingrese los polos de G(s) como vector: ');
+vector_ceros_planta = input('Ingrese los ceros de G(s) como vector: ');
+vector_polos_planta = input('Ingrese los polos de G(s) como vector: ');
 
 % los ceros y polos se convierten en polinomios usando poly()
 coeficientes_numerador = poly(vector_ceros_planta); % polinomio del numerador
@@ -44,19 +44,23 @@ title('Donde estan los Polos (X) y ceros (O) de la planta original, además aqu�
 % El usuario hace click en la gráfica del plano complejo de antes, por eso el mensaje lo dice de una vez
 % ginput(1) captura las coordenadas (x,y) del punto seleccionado
 
-disp('Haga click en la gráfica para seleccionar un nuevo polo...');
-[x_click, y_click] = ginput(1); % captura coordenadas del click
+
+% Para que se puedan varios polos
+cantidad_polos_nuevos = input('Cuántos polos nuevos quiere agregar con clicks?')
+
+disp('Haga los clicks en la gráfica para seleccionar un o los nuevos polos');
+[x_clicks, y_clicks] = ginput(cantidad_polos_nuevos); % captura coordenadas del click
 
 % Polne las coordenadas en un número complejo (nuevo polo)
-nuevo_polo_compensador = x_click + 1i*y_click;
+nuevos_polos_compensador = x_clicks + 1i*y_clicks;
 
 % Se muestra el polo seleccionado con el click
-disp('El nuevo polo seleccionado con el click:');
-disp(nuevo_polo_compensador);
+disp('Los nuevos polos seleccionados con el click:');
+disp(nuevos_polos_compensador);
 
 %% Crea la función compensada
-% Se agrega este polo al vector de polos originales
-vector_polos_compensador = [vector_polos_planta nuevo_polo_compensador];
+% Se agrega el o los polos al vector de polos originales
+vector_polos_compensador = [vector_polos_planta, nuevos_polos_compensador.'];
 
 % Hay que calcular el nuevo denominador con los polos compensados
 coeficientes_denominador_compensador = poly(vector_polos_compensador);
@@ -74,6 +78,4 @@ disp(funcion_transferencia_compensada);
 figure('Name','Respuesta al escalón del sistema compensado','NumberTitle','off');
 step(funcion_transferencia_compensada);
 grid on;
-
 title('Respuesta al escalón del sistema compensado final');
-
